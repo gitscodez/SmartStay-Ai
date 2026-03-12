@@ -64,6 +64,18 @@ padding:8px;
 display:none;
 }
 
+.passwordBox{
+position:relative;
+}
+
+.eye{
+position:absolute;
+right:12px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+}
+
 </style>
 
 </head>
@@ -83,18 +95,18 @@ display:none;
 
 </div>
 
-<!-- Student Login -->
-
 <div id="studentLogin" class="form-section">
 
 <input id="loginEmail" placeholder="Email">
+
+<div class="passwordBox">
 <input id="loginPassword" type="password" placeholder="Password">
+<span class="eye" onclick="togglePassword('loginPassword',this)">👁</span>
+</div>
 
 <button onclick="studentLogin()">Login</button>
 
 </div>
-
-<!-- Student Sign Up -->
 
 <div id="studentSignup" class="form-section hidden">
 
@@ -108,7 +120,10 @@ display:none;
 <option>Employee</option>
 </select>
 
+<div class="passwordBox">
 <input id="password" type="password" placeholder="Password">
+<span class="eye" onclick="togglePassword('password',this)">👁</span>
+</div>
 
 <button onclick="studentSignup()">Sign Up</button>
 
@@ -123,18 +138,18 @@ display:none;
 
 </div>
 
-<!-- Owner Login -->
-
 <div id="ownerLogin" class="form-section hidden">
 
 <input id="ownerLoginEmail" placeholder="Email">
+
+<div class="passwordBox">
 <input id="ownerLoginPassword" type="password" placeholder="Password">
+<span class="eye" onclick="togglePassword('ownerLoginPassword',this)">👁</span>
+</div>
 
 <button onclick="ownerLogin()">Login</button>
 
 </div>
-
-<!-- Owner Signup -->
 
 <div id="ownerSignup" class="form-section hidden">
 
@@ -144,7 +159,10 @@ display:none;
 <input id="ownerEmail" placeholder="Email">
 <input id="ownerMobile" placeholder="Mobile Number">
 
+<div class="passwordBox">
 <input id="ownerPassword" type="password" placeholder="Password">
+<span class="eye" onclick="togglePassword('ownerPassword',this)">👁</span>
+</div>
 
 <button onclick="ownerSignup()">Sign Up</button>
 
@@ -168,10 +186,21 @@ document.getElementById(id).classList.remove("hidden");
 
 }
 
+function togglePassword(id,icon){
+
+let field = document.getElementById(id);
+
+if(field.type === "password"){
+field.type="text";
+icon.innerHTML="🙈";
+}else{
+field.type="password";
+icon.innerHTML="👁";
+}
+
+}
+
 </script>
-
-
-<!-- Firebase Scripts -->
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -219,6 +248,12 @@ designation:designation
 
 alert("Student Registered Successfully")
 
+document.getElementById("name").value=""
+document.getElementById("workplace").value=""
+document.getElementById("email").value=""
+document.getElementById("mobile").value=""
+document.getElementById("password").value=""
+
 })
 
 .catch(error=>alert(error.message))
@@ -234,8 +269,30 @@ let password=document.getElementById("loginPassword").value
 
 auth.signInWithEmailAndPassword(email,password)
 
-.then(()=>{
+.then(userCredential=>{
+
+let userEmail=userCredential.user.email
+
+db.collection("students")
+.where("email","==",userEmail)
+.get()
+.then(snapshot=>{
+
+if(snapshot.empty){
+
+alert("Student record not found in database")
+
+}else{
+
 alert("Student Login Successful")
+
+document.getElementById("loginEmail").value=""
+document.getElementById("loginPassword").value=""
+
+}
+
+})
+
 })
 
 .catch(error=>alert(error.message))
@@ -267,6 +324,13 @@ mobile:mobile
 
 alert("Owner Registered Successfully")
 
+document.getElementById("ownerName").value=""
+document.getElementById("pgName").value=""
+document.getElementById("location").value=""
+document.getElementById("ownerEmail").value=""
+document.getElementById("ownerMobile").value=""
+document.getElementById("ownerPassword").value=""
+
 })
 
 .catch(error=>alert(error.message))
@@ -282,8 +346,30 @@ let password=document.getElementById("ownerLoginPassword").value
 
 auth.signInWithEmailAndPassword(email,password)
 
-.then(()=>{
+.then(userCredential=>{
+
+let userEmail=userCredential.user.email
+
+db.collection("owners")
+.where("email","==",userEmail)
+.get()
+.then(snapshot=>{
+
+if(snapshot.empty){
+
+alert("Owner record not found in database")
+
+}else{
+
 alert("Owner Login Successful")
+
+document.getElementById("ownerLoginEmail").value=""
+document.getElementById("ownerLoginPassword").value=""
+
+}
+
+})
+
 })
 
 .catch(error=>alert(error.message))
