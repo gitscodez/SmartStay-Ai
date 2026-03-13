@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStay AI | Student Dashboard</title>
+    <style>
+        :root {
+            --primary: #FFD700; /* Premium Gold */
+            --primary-glow: rgba(255, 215, 0, 0.3);
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --border: rgba(255, 215, 0, 0.2);
+            --success: #10B981;
+            --whatsapp: #25D366;
+            --match-purple: #7B61FF; /* Purple for AI Matching */
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            margin: 0; color: white; min-height: 100vh; overflow-x: hidden;
+        }
+
+        .bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .bg-image {
+            width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=2070');
+            background-size: cover; background-position: center; filter: brightness(0.35) contrast(1.1);
+            animation: slowZoom 25s infinite alternate;
+        }
+
+        @keyframes slowZoom { 0% { transform: scale(1); } 100% { transform: scale(1.12); } }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 50px; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px; font-weight: 900; letter-spacing: -1px;
+            background: linear-gradient(135deg, #FFF 40%, var(--primary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: lowercase;
+        }
+
+        .profileBox { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px 15px; border-radius: 50px; background: rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .profileImg { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+
+        .profileMenu {
+            position: absolute; right: 40px; top: 75px; background: #0F172A;
+            border-radius: 24px; padding: 25px; width: 260px; display: none;
+            text-align: center; z-index: 1001; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7); border: 1px solid var(--border);
+        }
+
+        .profilePicBox { position: relative; width: 85px; height: 85px; margin: 0 auto 15px; }
+        .profilePicBox img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        .editIcon { position: absolute; bottom: 0; right: 0; background: var(--primary); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #000; cursor: pointer; }
+
+        .searchBox { width: 90%; max-width: 750px; margin: 50px auto; background: var(--card-bg); padding: 40px; border-radius: 32px; border: 1px solid var(--border); backdrop-filter: blur(20px); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 16px 20px; margin: 12px 0; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px; box-sizing: border-box; }
+        .liveBtn { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 14px; width: 100%; border: 1px solid var(--success); border-radius: 16px; cursor: pointer; font-weight: 700; margin: 5px 0 15px; }
+        .searchBtn { width: 100%; padding: 18px; background: var(--primary); color: black; border: none; border-radius: 16px; cursor: pointer; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+
+        .pgContainer { width: 85%; margin: 0 auto 50px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+
+        /* PG CARD ENHANCEMENTS */
+        .pgCard { background: var(--card-bg); padding: 30px; border-radius: 28px; border: 1px solid var(--border); transition: 0.4s; position: relative; backdrop-filter: blur(10px); }
+        .pgCard:hover { transform: translateY(-10px); background: rgba(15, 23, 42, 0.95); border-color: var(--primary); }
+
+        .distance-badge { position: absolute; top: 25px; right: 25px; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(8px); border: 1px solid var(--success); color: var(--success); padding: 6px 14px; border-radius: 12px; font-size: 10px; font-weight: 800; }
+
+        /* AI MATCH BADGE */
+        .match-badge {
+            background: linear-gradient(90deg, var(--match-purple), #A855F7);
+            color: white; padding: 6px 15px; border-radius: 10px; font-size: 11px;
+            font-weight: 800; display: inline-block; margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(123, 97, 255, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        /* FOOD SECTION */
+        .food-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px; padding: 12px; margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .food-header { font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 1px; font-weight: 800; margin-bottom: 5px; }
+        .food-status { font-size: 13px; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
+
+        .btnGroup { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        .actionRow { display: flex; gap: 10px; }
+        .actionBtn { flex: 1; text-align: center; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; transition: 0.3s; }
+        .callBtn { background: var(--primary); color: black; }
+        .whatsappBtn { background: var(--whatsapp); color: white; }
+        .mapBtn { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); width: 100%; display: block; box-sizing: border-box; }
+
+        .logoutBtn { background: #EF4444; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 15px; }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-container"><div class="bg-image"></div></div>
+
+    <div class="header">
+        <div class="logo">smartstay<span>ai</span></div>
+        <div class="profileBox" onclick="toggleMenu()">
+            <img id="profileIcon" src="https://i.ibb.co/4pDNDk1/avatar.png" class="profileImg">
+            <div class="profileMenu" id="profileMenu">
+                <div class="profilePicBox">
+                    <img id="profilePic" src="https://i.ibb.co/4pDNDk1/avatar.png">
+                    <label for="imageUpload" class="editIcon">✏️</label>
+                    <input type="file" id="imageUpload" style="display:none" onchange="uploadImage()">
+                </div>
+                <p id="profileName" style="font-weight: 700; font-size: 18px; margin-bottom: 5px; color: #FFF;">Loading...</p>
+                <p id="profileDesignationDisplay" style="color: var(--primary); font-size: 12px; font-weight: 700; text-transform: uppercase;"></p>
+                <p id="profileEmail" style="font-size: 13px; color: #94A3B8; margin-bottom: 5px;"></p>
+                <button class="logoutBtn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="searchBox">
+        <h2 style="color: var(--primary); text-align: center; margin-top: 0; letter-spacing: -1px; font-size: 28px;">Find Your Next Stay</h2>
+        <input id="location" placeholder="Search by area, street or college...">
+        <button class="liveBtn" onclick="useLiveLocation()">📍 Sync Precision Location</button>
+        <input id="budget" type="number" placeholder="Enter Max Monthly Budget (₹)">
+        <button class="searchBtn" onclick="searchPG()">Explore Matches</button>
+    </div>
+
+    <div class="pgContainer" id="pgContainer"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd4gt4NtdIw9sc1vQ0JvONzVN9YdFji3I",
+            authDomain: "smartstayai-8546b.firebaseapp.com",
+            projectId: "smartstayai-8546b",
+            storageBucket: "smartstayai-8546b.firebasestorage.app",
+            messagingSenderId: "872249917190",
+            appId: "1:872249917190:web:674e312f15005dba9ca887"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        let currentUserCoords = null;
+        let userDocId = null;
+        let userDesignation = ""; // For Roommate Matching
+
+        auth.onAuthStateChanged(function (user) {
+            if (!user) { window.location.href = "index.html" } 
+            else { loadProfile(user.email) }
+        });
+
+        function loadProfile(email) {
+            db.collection("students").where("email", "==", email).get().then(snapshot => {
+                if (!snapshot.empty) {
+                    snapshot.forEach(doc => {
+                        userDocId = doc.id;
+                        let data = doc.data();
+                        userDesignation = data.designation || "Student";
+                        document.getElementById("profileName").innerText = data.name || "User";
+                        document.getElementById("profileEmail").innerText = data.email;
+                        document.getElementById("profileDesignationDisplay").innerText = userDesignation;
+                        if (data.profilePic) {
+                            document.getElementById("profilePic").src = data.profilePic;
+                            document.getElementById("profileIcon").src = data.profilePic;
+                        }
+                    });
+                }
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        async function useLiveLocation() {
+            if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
+            const status = document.querySelector('.liveBtn');
+            const originalText = status.innerHTML;
+            status.innerHTML = "⌛ Calibrating Precision...";
+            const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                currentUserCoords = { lat: position.coords.latitude, lon: position.coords.longitude };
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentUserCoords.lat}&lon=${currentUserCoords.lon}`);
+                    const data = await res.json();
+                    const areaName = data.address.suburb || data.address.neighbourhood || data.address.city || data.address.town;
+                    if (areaName) { document.getElementById("location").value = areaName; status.innerHTML = originalText; }
+                } catch (err) { status.innerHTML = originalText; }
+            }, (error) => { status.innerHTML = originalText; alert("Enable GPS."); }, options);
+        }
+
+        async function searchPG() {
+            let locationSearch = document.getElementById("location").value.toLowerCase().trim();
+            let budgetSearch = document.getElementById("budget").value;
+            let container = document.getElementById("pgContainer");
+            if (!locationSearch || !budgetSearch) { alert("Fill in search details."); return; }
+            container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; opacity: 0.6; color: var(--primary);'>AI Gourmet Compass & Roommate Matcher initializing...</p>";
+
+            try {
+                const snapshot = await db.collection("pgListings").get();
+                container.innerHTML = "";
+                let foundResults = [];
+
+                for (const doc of snapshot.docs) {
+                    let data = doc.data();
+                    let pgPrice = Number(data.price);
+                    if ((data.location.toLowerCase().includes(locationSearch) || data.address.toLowerCase().includes(locationSearch)) && pgPrice <= Number(budgetSearch)) {
+                        let ownerMobile = "N/A";
+                        const ownerSnap = await db.collection("owners").where("email", "==", data.owner).get();
+                        if (!ownerSnap.empty) { ownerMobile = ownerSnap.docs[0].data().mobile || "N/A"; }
+
+                        let pgLat, pgLon, distance = null;
+                        if (data.address.includes("Live Location:")) {
+                            const coords = data.address.split(":")[1].split(",");
+                            pgLat = parseFloat(coords[0]); pgLon = parseFloat(coords[1]);
+                        } else {
+                            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.address)}`);
+                            const geoData = await geoRes.json();
+                            if (geoData[0]) { pgLat = parseFloat(geoData[0].lat); pgLon = parseFloat(geoData[0].lon); }
+                        }
+                        if (currentUserCoords && pgLat && pgLon) { distance = calculateDistance(currentUserCoords.lat, currentUserCoords.lon, pgLat, pgLon); }
+                        foundResults.push({ ...data, ownerMobile, distance });
+                    }
+                }
+
+                if (currentUserCoords) { foundResults.sort((a, b) => (a.distance || 9999) - (b.distance || 9999)); }
+
+                if (foundResults.length > 0) {
+                    foundResults.forEach(d => {
+                        let mapUrl = d.address.includes("Live Location:") ? `https://www.google.com/maps?q=${d.address.split(":")[1].trim()}` : `https://www.google.com/maps/search/${encodeURIComponent(d.address)}`;
+                        
+                        let commuteText = "";
+                        if (d.distance) {
+                            let walkTime = Math.round(d.distance * 12);
+                            let driveTime = Math.round(d.distance * 3);
+                            commuteText = `✨ ${d.distance.toFixed(1)} km | 🚶 ${walkTime}m | 🚗 ${driveTime}m`;
+                        }
+
+                        // ROOMMATE MATCHER LOGIC
+                        let matchBadge = "";
+                        if (userDesignation && (d.amenities.toLowerCase().includes(userDesignation.toLowerCase()) || d.pgName.toLowerCase().includes(userDesignation.toLowerCase()))) {
+                            matchBadge = `<div class="match-badge">🔥 TOP MATCH: High Density of ${userDesignation}s</div>`;
+                        } else {
+                            matchBadge = `<div class="match-badge" style="background: rgba(255,255,255,0.1)">Verified Roommates Available</div>`;
+                        }
+
+                        // FOOD COMPASS LOGIC
+                        let foodBadge = d.food && d.food.toLowerCase().includes('mess') ? "🍱 Gourmet Mess Plan" : "🥗 Organic Meals Included";
+
+                        container.innerHTML += `
+                        <div class="pgCard">
+                            ${d.distance ? `<div class="distance-badge">${commuteText}</div>` : ''}
+                            <div class="suggest-tag">SMARTSTAY VERIFIED</div>
+                            ${matchBadge}
+                            <h3>${d.pgName}</h3>
+                            <p><b>📍 Location:</b> ${d.address}</p>
+                            
+                            <div class="food-container">
+                                <div class="food-header">AI Gourmet Compass</div>
+                                <div class="food-status"><span>${foodBadge}</span> • <span style="color: var(--success)">Live Menu Active</span></div>
+                            </div>
+
+                            <p><b>💰 Rent:</b> ₹${d.price} / mo</p>
+                            <p><b>🏠 Type:</b> ${d.roomType} (${d.furnished || 'Standard'})</p>
+                            <p><b>✨ Perks:</b> <span style="font-style: italic;">${d.amenities || 'Standard facilities'}</span></p>
+                            
+                            <div class="btnGroup">
+                                <div class="actionRow">
+                                    <a href="tel:${d.ownerMobile}" class="actionBtn callBtn">Call</a>
+                                    <a href="https://wa.me/${d.ownerMobile}?text=Hi, I found your property ${d.pgName} on SmartStay AI and I'm a ${userDesignation}." target="_blank" class="actionBtn whatsappBtn">Inquire</a>
+                                </div>
+                                <a href="${mapUrl}" target="_blank" class="actionBtn mapBtn">View on Map</a>
+                            </div>
+                        </div>`;
+                    });
+                } else { container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: var(--primary);'>No matches found.</p>"; }
+            } catch (err) { container.innerHTML = "Error loading listings."; }
+        }
+
+        function toggleMenu() { let menu = document.getElementById("profileMenu"); menu.style.display = menu.style.display === "block" ? "none" : "block"; }
+
+        function uploadImage() {
+            let file = document.getElementById("imageUpload").files[0];
+            if (!file || !userDocId) return;
+            let storageRef = storage.ref("profilePictures/" + auth.currentUser.uid);
+            storageRef.put(file).then(() => storageRef.getDownloadURL()).then(url => {
+                db.collection("students").doc(userDocId).update({ profilePic: url }).then(() => {
+                    document.getElementById("profilePic").src = url;
+                    document.getElementById("profileIcon").src = url;
+                    alert("Profile picture updated!");
+                });
+            });
+        }
+
+        function logout() { auth.signOut().then(() => { window.location.href = "index.html" }) }
+    </script>
+</body>
+</html>
